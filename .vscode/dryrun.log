@@ -1,0 +1,12 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/pi/projects/RPi_Test'
+gcc -Wall   -c -o main.o main.c
+gcc -Wall   -c -o bcm2835.o bcm2835.c
+gcc -Wall   -c -o lr1110_hal.o lr1110_hal.c
+gcc -Wall   -c -o lr1110_gnss.o lr1110_gnss.c
+gcc -Wall   -c -o lr1110_regmem.o lr1110_regmem.c
+gcc -Wall   -c -o lr1110_wifi.o lr1110_wifi.c
+gcc -Wall   -c -o lr1110_system.o lr1110_system.c
+gcc -Wall -o lrtest main.o bcm2835.o lr1110_hal.o lr1110_gnss.o lr1110_regmem.o lr1110_wifi.o lr1110_system.o 
+make: Leaving directory '/home/pi/projects/RPi_Test'
+ 
