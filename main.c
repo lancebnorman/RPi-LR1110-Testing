@@ -36,13 +36,79 @@
 
 radio_t *radio = NULL;
 
+// Initialize I2C
+
+int init_i2c()
+{
+    if (!bcm2835_i2c_begin())
+    {
+        printf("i2c initialization failed\n");
+        return 1;
+    }
+    bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_150);
+    bcm2835_i2c_set_baudrate(400000);	
+
+    printf("began i2c\n");
+    return 0;
+}
+
+// SHT31 Temp Sensor 
+
+static uint8_t sht31_crc(uint8_t *data) {
+
+    uint8_t crc = 0xff;
+    int i, j;
+    for(i = 0; i < 2; i++) {
+        crc ^= data[i];
+        for(j = 0; j < 8; j++) {
+            if(crc & 0x80) {
+                crc <<= 1;
+                crc ^= 0x131;
+            }
+            else
+                crc <<= 1;
+        }
+    }
+    return crc;
+}
+
+#define MAX_LEN 32
+
+int read_temp()
+{
+    // Set slave address to 0x24
+    bcm2835_i2c_setSlaveAddress(0x44);
+
+    // Command to read temp and relative humidity
+    char read_cmd[2] = {0};
+    read_cmd[0] = 0x2C;
+    read_cmd[1] = 0x06;
+    bcm2835_i2c_write(read_cmd, 2);
+
+    delay(10);
+
+    char data[6] = {0};
+    bcm2835_i2c_read(data, 6);
+    printf("data[0] = %d", data[0]);
+
+    double cTemp = (((data[0] * 256) + data[1]) * 175.0) / 65535.0 - 45.0;
+    double fTemp = (((data[0] * 256) + data[1]) * 315.0) / 65535.0 - 49.0;
+    double humidity = (((data[3] * 256) + data[4])) * 100.0 / 65535.0;
+
+    printf("Temperature in Celsius : %f\n", cTemp);
+    printf("Temperature in Fahrenheit : %.2f F \n", fTemp);
+    printf("Relative Humidity is : %.2f RH \n", humidity);
+
+    return 1;
+}
+
 // Initialize SPI
 int init_spi()
 {
 
     if (!bcm2835_spi_begin())
     {
-        printf("spi begin failed");
+        printf("spi initialization failed\n");
         return 1;
     }
 
@@ -725,13 +791,12 @@ int main(int argc, char **argv)
 
     init_spi();
 
+    init_i2c();
+
+    read_temp();
+
     init_lr1110();
-    //lr1110_system_reboot(radio, false);
 
-
-
-
-    
     myWifi_scan(radio);
 
     while(bcm2835_gpio_lev(BUSY) == HIGH){
@@ -751,6 +816,8 @@ int main(int argc, char **argv)
     gnss_fetch_and_print_results();
     
     bcm2835_spi_end();
+    
+    bcm2835_i2c_end();
     bcm2835_close();
 
     return 0;
