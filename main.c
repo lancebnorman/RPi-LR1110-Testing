@@ -6,6 +6,9 @@
 #include "lr1110_system.h"
 #include "lr1110_system_types.h"
 #include "lr1110_gnss_types.h"
+#include "lis3dh.h"
+#include "lis3dh_types.h"
+
 #include <stdio.h>
 #include <time.h>
 
@@ -45,35 +48,14 @@ int init_i2c()
         printf("i2c initialization failed\n");
         return 1;
     }
-    bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_150);
-    bcm2835_i2c_set_baudrate(400000);	
+    bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_626);
+    bcm2835_i2c_set_baudrate(10);	
 
-    printf("began i2c\n");
+
     return 0;
 }
 
 // SHT31 Temp Sensor 
-
-static uint8_t sht31_crc(uint8_t *data) {
-
-    uint8_t crc = 0xff;
-    int i, j;
-    for(i = 0; i < 2; i++) {
-        crc ^= data[i];
-        for(j = 0; j < 8; j++) {
-            if(crc & 0x80) {
-                crc <<= 1;
-                crc ^= 0x131;
-            }
-            else
-                crc <<= 1;
-        }
-    }
-    return crc;
-}
-
-#define MAX_LEN 32
-
 int read_temp()
 {
     // Set slave address to 0x24
@@ -89,7 +71,6 @@ int read_temp()
 
     char data[6] = {0};
     bcm2835_i2c_read(data, 6);
-    printf("data[0] = %d", data[0]);
 
     double cTemp = (((data[0] * 256) + data[1]) * 175.0) / 65535.0 - 45.0;
     double fTemp = (((data[0] * 256) + data[1]) * 315.0) / 65535.0 - 49.0;
@@ -100,6 +81,37 @@ int read_temp()
     printf("Relative Humidity is : %.2f RH \n", humidity);
 
     return 1;
+}
+
+static lis3dh_sensor_t* accelerometer;
+
+// Initialize and configure lis3dh accelerometer 
+void init_accel()
+{
+    // Initialize lis3dh accelerometer  
+    accelerometer = lis3dh_init_sensor (0, LIS3DH_I2C_ADDRESS_1, 0);
+
+    // configure HPF and reset the reference by dummy read
+    lis3dh_config_hpf (accelerometer, lis3dh_hpf_normal, 0, true, true, true, true);
+    lis3dh_get_hpf_ref (accelerometer);
+    
+    // enable ADC inputs and temperature sensor for ADC input 3
+    lis3dh_enable_adc (accelerometer, true, true);
+    
+    // LAST STEP: Finally set scale and mode to start measurements
+    lis3dh_set_scale(accelerometer, lis3dh_scale_2_g);
+    lis3dh_set_mode (accelerometer, lis3dh_odr_400, lis3dh_high_res, true, true, true);
+}
+
+// Read acclerometer data and output over serial port
+void read_accel()
+{
+    lis3dh_float_data_t  data;
+    //lis3dh_float_data_fifo_t fifo_data;
+    lis3dh_get_float_data(accelerometer, &data);
+    //lis3dh_get_float_data_fifo(accelerometer, &fifo_data);
+    printf("LIS3DH (xyz)[g] ax=%+7.3f ay=%+7.3f az=%+7.3f\n",
+                data.ax, data.ay, data.az);
 }
 
 // Initialize SPI
@@ -507,12 +519,6 @@ void wifi_fetch_and_print_scan_basic_complete_results( const void* radio )
         print_mac_address( "  -> MAC address: ", local_result.mac_address );
         printf( "  -> Channel: %s\n", lr1110_wifi_channel_to_str( channel ) );
         printf( "  -> MAC origin: %s\n", ( rssi_validity ? "From gateway" : "From end device" ) );
-        /*
-        printf(
-            "  -> Signal type: %s\n",
-            lr1110_wifi_signal_type_result_to_str(
-                lr1110_wifi_extract_signal_type_from_data_rate_info( local_result.data_rate_info_byte ) ) );
-                */
         printf( "  -> Frame type: %s\n", lr1110_wifi_frame_type_to_str( frame_type ) );
         printf( "  -> Frame sub-type: 0x%02X\n", frame_sub_type );
         printf( "  -> FromDS/ToDS: %s / %s\n", ( ( from_ds == true ) ? "true" : "false" ),
@@ -690,7 +696,6 @@ void myGPS_scan(const void* context)
 #define WIFI_ABORT_ON_TIMEOUT ( true )
 #define WIFI_TIMEOUT_PER_CHANNEL ( 1000 )
 
-
 typedef struct
 {
     lr1110_wifi_channel_mask_t channel_mask;
@@ -795,6 +800,11 @@ int main(int argc, char **argv)
 
     read_temp();
 
+    init_accel();
+
+    read_accel();
+
+    /*
     init_lr1110();
 
     myWifi_scan(radio);
@@ -814,10 +824,11 @@ int main(int argc, char **argv)
     };
 
     gnss_fetch_and_print_results();
-    
+    */
     bcm2835_spi_end();
     
     bcm2835_i2c_end();
+    
     bcm2835_close();
 
     return 0;
