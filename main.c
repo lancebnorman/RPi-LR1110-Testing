@@ -159,7 +159,7 @@ void init_lr1110()
     // Configure DC-DC converter
     lr1110_system_set_regmode( radio, LR1110_SYSTEM_REGMODE_DCDC_CONVERTER );
 
-    /*
+    
     // Configure RF switch??
     lr1110_system_rfswitch_config_t rf_switch_configuration = {0};
     rf_switch_configuration.enable  = LR1110_SYSTEM_RFSW0_HIGH | LR1110_SYSTEM_RFSW1_HIGH | LR1110_SYSTEM_RFSW2_HIGH | LR1110_SYSTEM_RFSW3_HIGH ;
@@ -171,14 +171,14 @@ void init_lr1110()
     rf_switch_configuration.gnss    = LR1110_SYSTEM_RFSW2_HIGH; 
 
     lr1110_system_set_dio_as_rf_switch( radio, &rf_switch_configuration );
-    */
+    
 
     // Initialize TCXO control
-    lr1110_system_set_tcxo_mode( radio , 0x07, 500);
+    lr1110_system_set_tcxo_mode( radio , 0x07, 1000);
 
     // Configure Low frequency clock
-    lr1110_system_config_lfclk( radio, LR1110_SYSTEM_LFCLK_XTAL, false);
-    //lr1110_system_config_lfclk( radio, LR1110_SYSTEM_LFCLK_RC, false);
+    //lr1110_system_config_lfclk( radio, LR1110_SYSTEM_LFCLK_XTAL, false);
+    lr1110_system_config_lfclk( radio, LR1110_SYSTEM_LFCLK_RC, false);
 
     // clear errors and calibrate system
     lr1110_system_clear_errors(radio);
@@ -196,8 +196,8 @@ void init_lr1110()
 
     delay(500);
 
-    //lr1110_system_set_dio_irq_params(radio, LR1110_SYSTEM_IRQ_ALL_MASK, 0);
-    //lr1110_system_clear_irq(radio, LR1110_SYSTEM_IRQ_ALL_MASK);
+    lr1110_system_set_dio_irq_params(radio, LR1110_SYSTEM_IRQ_ALL_MASK, 0);
+    lr1110_system_clear_irq(radio, LR1110_SYSTEM_IRQ_ALL_MASK);
 
 }
 
@@ -549,7 +549,7 @@ void wifi_fetch_and_print_scan_basic_complete_results( const void* radio )
 /**
  * @brief Maximum number of SV to search per scan
  */
-#define GNSS_MAX_SV ( 20 )
+#define GNSS_MAX_SV ( 10 )
 
 /**
  * @brief Maximum number of scan to execute in a row
@@ -671,8 +671,8 @@ void myGPS_scan(const void* context)
     printf("now: %u \n", gnss_time);
     uint8_t inter_cap_delay_s;
 
-    lr1110_gnss_set_scan_mode(context, LR1110_GNSS_SINGLE_SCAN_MODE, &inter_cap_delay_s);
-    //lr1110_gnss_set_scan_mode(context, gnss_time, &inter_cap_delay_s);
+    //lr1110_gnss_set_scan_mode(context, LR1110_GNSS_SINGLE_SCAN_MODE, &inter_cap_delay_s);
+    lr1110_gnss_set_scan_mode(context, 3, &inter_cap_delay_s);
 
     //lr1110_gnss_set_assistance_position( context, &gnss_configuration.assistance_position );
 
@@ -804,7 +804,7 @@ int main(int argc, char **argv)
 
     read_accel();
 
-    /*
+    
     init_lr1110();
 
     myWifi_scan(radio);
@@ -824,7 +824,8 @@ int main(int argc, char **argv)
     };
 
     gnss_fetch_and_print_results();
-    */
+    
+
     bcm2835_spi_end();
     
     bcm2835_i2c_end();
