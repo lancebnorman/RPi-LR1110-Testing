@@ -242,8 +242,8 @@ static bool    lis3dh_is_available(lis3dh_sensor_t* dev);
 
 static bool    lis3dh_i2c_read    (lis3dh_sensor_t* dev, uint8_t reg, uint8_t *data, uint16_t len);
 static bool    lis3dh_i2c_write   (lis3dh_sensor_t* dev, uint8_t reg, uint8_t *data, uint16_t len);
-static bool    lis3dh_spi_read    (lis3dh_sensor_t* dev, uint8_t reg, uint8_t *data, uint16_t len);
-static bool    lis3dh_spi_write   (lis3dh_sensor_t* dev, uint8_t reg, uint8_t *data, uint16_t len);
+//static bool    lis3dh_spi_read    (lis3dh_sensor_t* dev, uint8_t reg, uint8_t *data, uint16_t len);
+//static bool    lis3dh_spi_write   (lis3dh_sensor_t* dev, uint8_t reg, uint8_t *data, uint16_t len);
 
 #define msb_lsb_to_type(t,b,o) (t)(((t)b[o] << 8) | b[o+1])
 #define lsb_msb_to_type(t,b,o) (t)(((t)b[o+1] << 8) | b[o])
@@ -263,7 +263,7 @@ lis3dh_sensor_t* lis3dh_init_sensor (uint8_t bus, uint8_t addr, uint8_t cs)
 {
     lis3dh_sensor_t* dev;
 
-    
+
     if ((dev = malloc (sizeof(lis3dh_sensor_t))) == NULL)
         return NULL;
         
@@ -277,17 +277,6 @@ lis3dh_sensor_t* lis3dh_init_sensor (uint8_t bus, uint8_t addr, uint8_t cs)
     dev->scale      = lis3dh_scale_2_g;
     dev->fifo_mode  = lis3dh_bypass;
     dev->fifo_first = true;
-    
-    /*
-    // if addr==0 then SPI is used and has to be initialized
-    if (!addr && !spi_device_init (bus, cs))
-    {
-        error_dev ("Could not initialize SPI interface.", __FUNCTION__, dev);
-        free (dev);
-        return NULL;
-    }
-    */
-
     
     // check availability of the sensor
     if (!lis3dh_is_available (dev))
@@ -1113,8 +1102,9 @@ bool lis3dh_reg_write(lis3dh_sensor_t* dev, uint8_t reg, uint8_t *data, uint16_t
     return lis3dh_i2c_write(dev, reg, data, len);
 }
 
-// TODO - SPI implementation
+// TODO - SPI implementation if neccessary 
 
+/*
 #define LIS3DH_SPI_BUF_SIZE 64      // SPI register data buffer size of ESP866
 
 #define LIS3DH_SPI_READ_FLAG      0x80
@@ -1123,7 +1113,7 @@ bool lis3dh_reg_write(lis3dh_sensor_t* dev, uint8_t reg, uint8_t *data, uint16_t
 
 static bool lis3dh_spi_read(lis3dh_sensor_t* dev, uint8_t reg, uint8_t *data, uint16_t len)
 {
-    /*
+    
     if (!dev || !data) return false;
 
     if (len >= LIS3DH_SPI_BUF_SIZE)
@@ -1163,15 +1153,12 @@ static bool lis3dh_spi_read(lis3dh_sensor_t* dev, uint8_t reg, uint8_t *data, ui
     printf("\n");
     #endif
 
-    */
-
     return true;
 }
 
 
 static bool lis3dh_spi_write(lis3dh_sensor_t* dev, uint8_t reg, uint8_t *data, uint16_t len)
 {
-    /*
     if (!dev || !data) return false;
 
     uint8_t addr = (reg & 0x3f) | LIS3DH_SPI_WRITE_FLAG | LIS3DH_SPI_AUTO_INC_FLAG;
@@ -1210,19 +1197,16 @@ static bool lis3dh_spi_write(lis3dh_sensor_t* dev, uint8_t reg, uint8_t *data, u
         dev->error_code |= LIS3DH_SPI_WRITE_FAILED;
         return false;
     }
-    */
+    
     return true;
 }
-
+*/
 
 #define I2C_AUTO_INCREMENT (0x80)
 
 static bool lis3dh_i2c_read(lis3dh_sensor_t* dev, uint8_t reg, uint8_t *data, uint16_t len)
 {
     if (!dev || !data) return false;
-
-    //debug_dev ("Read %d byte from i2c slave register %02x.", __FUNCTION__, dev, len, reg);
-
     
     if (len > 1)
         reg |= I2C_AUTO_INCREMENT;
@@ -1230,16 +1214,12 @@ static bool lis3dh_i2c_read(lis3dh_sensor_t* dev, uint8_t reg, uint8_t *data, ui
 
     if (len == 0) return true;
 
-    uint8_t dummy_data;
+    bcm2835_i2c_setSlaveAddress(dev->addr);
 
-    bcm2835_i2c_setSlaveAddress(0x18);
-
-    if(reg)
-        bcm2835_i2c_write(&reg, 7);
-
-    if(data)
-        bcm2835_i2c_read(data, len);
-
+    if(reg) bcm2835_i2c_write((const char*)&reg, 7);
+        
+    if(data) bcm2835_i2c_read((char*)data, len);
+        
     return true;
 }
 
@@ -1253,14 +1233,11 @@ static bool lis3dh_i2c_write(lis3dh_sensor_t* dev, uint8_t reg, uint8_t *data, u
         reg |= I2C_AUTO_INCREMENT;
         
     // Set slave address to 0x18
-    bcm2835_i2c_setSlaveAddress(0x18);
+    bcm2835_i2c_setSlaveAddress(dev->addr);
     
-    if(reg)
-        bcm2835_i2c_write(&reg, 7);
-
-    if(data)
-        bcm2835_i2c_write(data, len);
-
+    if(reg) bcm2835_i2c_write((const char*)&reg, 7);
     
+    if(data) bcm2835_i2c_write((char*)data, len);
+        
     return true;
 }

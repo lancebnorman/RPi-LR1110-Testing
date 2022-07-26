@@ -135,7 +135,7 @@ void lr1110_system_get_status( const void* radio, lr1110_system_stat1_t* stat1, 
     cbuffer[0] = ( uint8_t )( LR1110_SYSTEM_GET_STATUS_OC >> 8 );
     cbuffer[1] = ( uint8_t )( LR1110_SYSTEM_GET_STATUS_OC >> 0 );
 
-    lr1110_hal_direct_read( radio, cbuffer, cbuffer, LR1110_SYSTEM_GET_STATUS_CMD_LENGTH );
+    lr1110_hal_write_read( radio, cbuffer, cbuffer, LR1110_SYSTEM_GET_STATUS_CMD_LENGTH );
 
     stat1->is_interrupt_active = ( ( cbuffer[0] & 0x01 ) != 0 ) ? true : false;
     stat1->command_status      = ( lr1110_system_command_status_t )( cbuffer[0] >> 1 );

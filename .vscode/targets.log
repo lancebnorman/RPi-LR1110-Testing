@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Mon Jul 18 10:32:09 2022
+# Make data base, printed on Tue Jul 26 12:34:33 2022
 
 # Variables
 
@@ -32,8 +32,8 @@ VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 PWD = /home/pi/projects/RPi_Test
 # automatic
 %D = $(patsubst %/,%,$(dir $%))
-# makefile (from 'makefile', line 4)
-OBJFILES = main.o bcm2835.o lr1110_hal.o lr1110_gnss.o lr1110_regmem.o lr1110_wifi.o lr1110_system.o
+# makefile (from 'makefile', line 5)
+OBJFILES = main.o bcm2835/bcm2835.o lis3dh/lis3dh.o lr1110/lr1110_hal.o lr1110/lr1110_gnss.o lr1110/lr1110_regmem.o lr1110/lr1110_wifi.o lr1110/lr1110_system.o 
 # automatic
 ^D = $(patsubst %/,%,$(dir $^))
 # automatic
@@ -87,7 +87,7 @@ MAKELEVEL := 0
 # default
 MAKE = $(MAKE_COMMAND)
 # environment
-PATH = /home/pi/.vscode-server/bin/92d25e35d9bf1a6b16f7d0758f25d48ace11e5b9/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games
+PATH = /home/pi/.vscode-server/bin/3b889b090b5ad5793f524b5d1d39fda662b96a2a/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games
 # default
 MAKEFILES := 
 # environment
@@ -97,7 +97,7 @@ MOTD_SHOWN = pam
 # automatic
 ^F = $(notdir $^)
 # environment
-SSH_CLIENT = 192.168.0.103 56224 22
+SSH_CLIENT = 73.248.40.7 57634 22
 # automatic
 ?F = $(notdir $?)
 # environment
@@ -107,7 +107,7 @@ LS_COLORS =
 # 'override' directive
 GNUMAKEFLAGS := 
 # environment
-BROWSER = /home/pi/.vscode-server/bin/92d25e35d9bf1a6b16f7d0758f25d48ace11e5b9/bin/helpers/browser.sh
+BROWSER = /home/pi/.vscode-server/bin/3b889b090b5ad5793f524b5d1d39fda662b96a2a/bin/helpers/browser.sh
 # environment
 LOGNAME = pi
 # makefile
@@ -121,13 +121,13 @@ LDFLAGS =
 # environment
 VSCODE_AGENT_FOLDER = /home/pi/.vscode-server
 # environment
-_ = /home/pi/.vscode-server/bin/92d25e35d9bf1a6b16f7d0758f25d48ace11e5b9/node
+_ = /home/pi/.vscode-server/bin/3b889b090b5ad5793f524b5d1d39fda662b96a2a/node
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # makefile (from 'makefile', line 2)
 CFLAGS = -Wall
 # environment
-VSCODE_IPC_HOOK_CLI = /run/user/1000/vscode-ipc-7c9acf5f-c069-4327-8869-9544516c7e6f.sock
+VSCODE_IPC_HOOK_CLI = /run/user/1000/vscode-ipc-ed535e90-5359-404f-9369-6f9b32fbc7a4.sock
 # environment
 XDG_SESSION_CLASS = user
 # environment
@@ -144,14 +144,14 @@ XDG_SESSION_ID = 4
 <F = $(notdir $<)
 # default
 SUFFIXES := 
-# makefile (from 'makefile', line 5)
+# makefile (from 'makefile', line 6)
 TARGET = lrtest
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
 # makefile (from 'makefile', line 1)
 CC = gcc
 # environment
-SSH_CONNECTION = 192.168.0.103 56224 192.168.0.104 22
+SSH_CONNECTION = 73.248.40.7 57634 192.168.0.104 22
 # variable set hash-table stats:
 # Load=71/1024=7%, Rehash=0, Collisions=1/104=1%
 
@@ -161,9 +161,9 @@ SSH_CONNECTION = 192.168.0.103 56224 192.168.0.104 22
 
 # Directories
 
-# . (device 45826, inode 10393): 39 files, no impossibilities.
+# . (device 45826, inode 10393): 13 files, no impossibilities.
 
-# 39 files, no impossibilities in 1 directories.
+# 13 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -171,32 +171,25 @@ SSH_CONNECTION = 192.168.0.103 56224 192.168.0.104 22
 
 # Files
 
-lrtest: main.o bcm2835.o lr1110_hal.o lr1110_gnss.o lr1110_regmem.o lr1110_wifi.o lr1110_system.o
-#  Implicit rule search has not been done.
-#  Last modified 2022-07-18 10:29:22.827780068
+# Not a target:
+lr1110/lr1110_system.o:
+#  Implicit rule search has been done.
+#  Last modified 2022-07-26 12:34:09.125721616
 #  File has been updated.
 #  Successfully updated.
-#  recipe to execute (from 'makefile', line 10):
+
+lrtest: main.o bcm2835/bcm2835.o lis3dh/lis3dh.o lr1110/lr1110_hal.o lr1110/lr1110_gnss.o lr1110/lr1110_regmem.o lr1110/lr1110_wifi.o lr1110/lr1110_system.o
+#  Implicit rule search has not been done.
+#  Last modified 2022-07-26 12:34:09.215712216
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'makefile', line 11):
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJFILES) $(LDFLAGS)
 
 # Not a target:
-bcm2835.o:
+lis3dh/lis3dh.o:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-18 10:04:09.384297748
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-lr1110_regmem.o:
-#  Implicit rule search has been done.
-#  Last modified 2022-07-18 10:04:09.794295801
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-lr1110_gnss.o:
-#  Implicit rule search has been done.
-#  Last modified 2022-07-18 10:04:09.684296324
+#  Last modified 2022-07-26 12:34:08.37580059
 #  File has been updated.
 #  Successfully updated.
 
@@ -204,13 +197,13 @@ clean:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
-#  recipe to execute (from 'makefile', line 13):
+#  recipe to execute (from 'makefile', line 14):
 	rm -f $(OBJFILES) $(TARGET) *~
 
 # Not a target:
-lr1110_hal.o:
+lr1110/lr1110_wifi.o:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-18 10:04:09.504297178
+#  Last modified 2022-07-26 12:34:08.985736267
 #  File has been updated.
 #  Successfully updated.
 
@@ -228,47 +221,62 @@ all: lrtest
 #  Successfully updated.
 
 # Not a target:
+bcm2835/bcm2835.o:
+#  Implicit rule search has been done.
+#  Last modified 2022-07-26 12:34:08.075832224
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
 main.o:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-18 10:29:22.727781809
+#  Last modified 2022-07-26 12:33:57.027065706
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+lr1110/lr1110_gnss.o:
+#  Implicit rule search has been done.
+#  Last modified 2022-07-26 12:34:08.715764738
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+lr1110/lr1110_regmem.o:
+#  Implicit rule search has been done.
+#  Last modified 2022-07-26 12:34:08.825753139
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
 makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-17 23:01:25.103907417
+#  Last modified 2022-07-26 12:34:05.616095879
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
-lr1110_system.o:
+lr1110/lr1110_hal.o:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-18 10:04:10.094294377
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-lr1110_wifi.o:
-#  Implicit rule search has been done.
-#  Last modified 2022-07-18 10:04:09.954295041
+#  Last modified 2022-07-26 12:34:08.515785827
 #  File has been updated.
 #  Successfully updated.
 
 # files hash-table stats:
-# Load=13/1024=1%, Rehash=0, Collisions=0/33=0%
+# Load=14/1024=1%, Rehash=0, Collisions=0/35=0%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 45 / storage = 655 B / avg = 14 B
-# current buf: size = 8174 B / used = 655 B / count = 45 / avg = 14 B
+# strcache buffers: 1 (0) / strings = 26 / storage = 292 B / avg = 11 B
+# current buf: size = 8174 B / used = 292 B / count = 26 / avg = 11 B
 
-# strcache performance: lookups = 62 / hit rate = 27%
+# strcache performance: lookups = 37 / hit rate = 29%
 # hash-table stats:
-# Load=45/8192=1%, Rehash=0, Collisions=0/62=0%
-# Finished Make data base on Mon Jul 18 10:32:09 2022
+# Load=26/8192=0%, Rehash=0, Collisions=0/37=0%
+# Finished Make data base on Tue Jul 26 12:34:33 2022
+ 
 
  

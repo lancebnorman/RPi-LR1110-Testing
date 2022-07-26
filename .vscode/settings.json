@@ -4,7 +4,9 @@
         "lr1110_gnss.h": "c",
         "lr1110_hal.h": "c",
         "lr1110_regmem.h": "c",
-        "lr1110_system_types.h": "c"
+        "lr1110_system_types.h": "c",
+        "lr1110_system.h": "c",
+        "lis3dh_types.h": "c"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }

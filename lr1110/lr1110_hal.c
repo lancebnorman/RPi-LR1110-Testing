@@ -52,16 +52,6 @@
 // Dummy Byte
 #define LR1110_NOP ( 0x00 )
 
-/*
-typedef struct
-{
-    int      nss;
-    int      reset;
-    int      irq;
-    int      busy;
-} radio_t;
-*/
-
 typedef enum
 {
     RADIO_SLEEP,
@@ -70,21 +60,10 @@ typedef enum
 
 static volatile radio_mode_t radio_mode = RADIO_AWAKE;
 
-void lr1110_hal_reset( const void* radio )
+void lr1110_hal_wait_on_busy()
 {
-    //radio_t* radio_local = ( radio_t* ) radio;
-    bcm2835_gpio_write(RESET, LOW);
-    delayMicroseconds(500); 
-    bcm2835_gpio_write(RESET, HIGH);
-    radio_mode = RADIO_AWAKE;
+    while(bcm2835_gpio_lev(BUSY) == HIGH){};
 
-    return LR1110_HAL_STATUS_OK;
-}
-
-lr1110_hal_status_t lr1110_hal_wakeup( const void* radio )
-{
-    lr1110_hal_check_device_ready(radio);
-    return LR1110_HAL_STATUS_OK;
 }
 
 void lr1110_hal_check_device_ready( const void* radio )
@@ -103,10 +82,18 @@ void lr1110_hal_check_device_ready( const void* radio )
     }
 }
 
-void lr1110_hal_wait_on_busy()
+void lr1110_hal_reset( const void* radio )
 {
-    while(bcm2835_gpio_lev(BUSY) == HIGH){};
+    bcm2835_gpio_write(RESET, LOW);
+    delayMicroseconds(500); 
+    bcm2835_gpio_write(RESET, HIGH);
+    radio_mode = RADIO_AWAKE;
+}
 
+lr1110_hal_status_t lr1110_hal_wakeup( const void* radio )
+{
+    lr1110_hal_check_device_ready(radio);
+    return LR1110_HAL_STATUS_OK;
 }
 
 lr1110_hal_status_t lr1110_hal_read( const void* radio, const uint8_t* cbuffer, const uint16_t cbuffer_length,
@@ -117,7 +104,7 @@ lr1110_hal_status_t lr1110_hal_read( const void* radio, const uint8_t* cbuffer, 
     /* 1st SPI transaction */
 
     bcm2835_gpio_write(NSS, LOW);
-    bcm2835_spi_transfern(cbuffer, cbuffer_length);
+    bcm2835_spi_transfern((char*)cbuffer, cbuffer_length);
     bcm2835_gpio_write(NSS, HIGH);
 
     lr1110_hal_check_device_ready( radio );
@@ -141,35 +128,26 @@ lr1110_hal_status_t lr1110_hal_write( const void* radio, const uint8_t* cbuffer,
     lr1110_hal_check_device_ready( radio );
 
     bcm2835_gpio_write(NSS, LOW);
-    bcm2835_spi_transfern(cbuffer, cbuffer_length);
-    bcm2835_spi_transfern(cdata, cdata_length);
+    bcm2835_spi_transfern((char*)cbuffer, cbuffer_length);
+    bcm2835_spi_transfern((char*)cdata, cdata_length);
     bcm2835_gpio_write(NSS, HIGH);
 
     return LR1110_HAL_STATUS_OK;
 }
 
-lr1110_hal_status_t lr1110_hal_direct_read( const void* radio, uint8_t* buffer, const uint16_t length )
+lr1110_hal_status_t lr1110_hal_write_read( const void* context, const uint8_t* command, uint8_t* data,
+                                           const uint16_t data_length )
 {
-    lr1110_hal_check_device_ready( radio );
+    lr1110_hal_check_device_ready( context );
 
     bcm2835_gpio_write(NSS, LOW);
     bcm2835_spi_transfer(LR1110_NOP);
-    for (uint16_t i = 0; i < buffer; i++)
+    for (uint8_t i = 0; i < data_length; i++)
     {
-        buffer[i] = bcm2835_spi_transfer(LR1110_NOP);
+        data[i] = bcm2835_spi_transfer(LR1110_NOP);
     }
     bcm2835_gpio_write(NSS, HIGH);
 
     return LR1110_HAL_STATUS_OK;
     
 }
-
-
-/*
-lr1110_hal_status_t lr1110_hal_write_read(const void* context, const uint8_t* command, uint8_t* data,
-                                           const uint16_t data_length)
-{
-
-
-}
-*/
